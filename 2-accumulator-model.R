@@ -14,8 +14,29 @@
 # so faster rates mean that less evidence is likely to accumulate on each step. we could make
 # these parameters more intuitive by taking 1/rate.1 and 1/rate.2 as the values to rexp().
 
+one.simulation <- function(rate.1, rate.2, criterion){
+  evidence.acc.1 <- 0
+  evidence.acc.2 <- 0
+  num.samples <- 0 
+  while((evidence.acc.1 <= criterion) && (evidence.acc.2 <= criterion)){
+    num.samples <- num.samples + 1
+    newval.1 <- rexp(1, rate.1)
+    newval.2 <- rexp(1, rate.2)
+    evidence.acc.1 <- evidence.acc.1 + newval.1
+    evidence.acc.2 <- evidence.acc.2 + newval.2
+  }
+  if(evidence.acc.1 >= evidence.acc.2){
+    return(c(TRUE, num.samples))
+  }
+  if(evidence.acc.2 > evidence.acc.1){
+    return(c(FALSE, num.samples))
+  }
+}
+
 accumulator.model <- function(samples, rate.1=40, rate.2=40, criterion=3){
-  
+  data <- replicate(samples, one.simulation(rate.1, rate.2, criterion))
+  accuracy.array <- data[1, 1:samples]
+  rt.array <- data[2, 1:samples]
 
   output <- data.frame(
     correct = accuracy.array,

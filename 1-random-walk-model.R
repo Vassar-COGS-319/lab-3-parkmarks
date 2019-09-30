@@ -9,13 +9,27 @@
 # sdrw is the variability in the drift rate (default value is 0.3)
 # criterion is the threshold for a response (default value is 3)
 
+#negative = incorrect evidence accumulation
+
+one.simulation <- function(drift, sdrw, criterion){
+  internal.evidence <- 0
+  num.samples <- 0 
+  while(internal.evidence <= criterion && internal.evidence >= (-criterion)){
+    num.samples <- num.samples + 1
+    newval <- rnorm(1, drift, sdrw)
+    internal.evidence <- internal.evidence + newval
+  }
+  return( c((internal.evidence > criterion), num.samples))
+}
+
 random.walk.model <- function(samples, drift=0, sdrw=0.3, criterion=3){
-  
+  data <- replicate(samples, one.simulation(drift, sdrw, criterion))
+  accuracy.array <- data[1, 1:samples]
+  rt.array <- data[2, 1:samples]
   output <- data.frame(
     correct = accuracy.array,
     rt = rt.array
   )
-  
   return(output)
 }
 
